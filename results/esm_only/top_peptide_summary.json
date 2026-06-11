@@ -1,0 +1,14 @@
+{
+  "TrainOOF": {
+    "MaxLength": 15,
+    "RequestedTopK": 10,
+    "SelectedCount": 10,
+    "SkippedBecauseTooLong": 21
+  },
+  "IndependentTest": {
+    "MaxLength": 15,
+    "RequestedTopK": 10,
+    "SelectedCount": 10,
+    "SkippedBecauseTooLong": 17
+  }
+}

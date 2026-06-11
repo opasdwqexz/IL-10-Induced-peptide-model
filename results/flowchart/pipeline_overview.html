@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IL-10 Peptide Model — Architecture (ESM-only)</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:#ffffff;
+    color:#1f2933;
+    font-family:"Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+    padding:54px 36px;
+  }
+  .sheet{max-width:1180px;margin:0 auto;}
+  h1{font-size:23px;font-weight:700;text-align:center;color:#111827;margin-bottom:4px;}
+  .sub{text-align:center;color:#6b7280;font-size:14px;margin-bottom:46px;}
+
+  /* horizontal flow */
+  .flow{display:flex;align-items:stretch;justify-content:center;gap:0;}
+  .stage{display:flex;align-items:center;}
+
+  .box{
+    width:158px;min-height:118px;
+    border:2px solid #cbd5e1;border-radius:14px;
+    background:#f8fafc;
+    padding:14px 14px;
+    display:flex;flex-direction:column;justify-content:center;text-align:center;
+  }
+  .box .step{font-size:10px;font-weight:700;letter-spacing:1px;color:#94a3b8;text-transform:uppercase;}
+  .box .title{font-size:15.5px;font-weight:700;margin-top:4px;color:#0f172a;line-height:1.3;}
+  .box .desc{font-size:12px;color:#64748b;margin-top:5px;line-height:1.4;}
+
+  .c-in   {border-color:#60a5fa;background:#eff6ff;}
+  .c-prep {border-color:#38bdf8;background:#f0f9ff;}
+  .c-esm  {border-color:#2dd4bf;background:#f0fdfa;}
+  .c-eval {border-color:#34d399;background:#f0fdf4;}
+  .c-out  {border-color:#a78bfa;background:#f5f3ff;}
+
+  /* horizontal arrow */
+  .arrow{width:40px;height:2.5px;background:#cbd5e1;position:relative;flex-shrink:0;}
+  .arrow::after{content:"";position:absolute;right:0;top:-5px;border:6px solid transparent;border-left-color:#cbd5e1;}
+
+  /* stacking model block (the focus) */
+  .model{
+    border:2px solid #f59e0b;border-radius:16px;background:#fffbeb;
+    padding:16px 18px;width:300px;min-height:118px;
+    display:flex;flex-direction:column;
+  }
+  .model .mhead{text-align:center;margin-bottom:12px;}
+  .model .mhead .step{font-size:10px;font-weight:700;letter-spacing:1px;color:#d97706;text-transform:uppercase;}
+  .model .mhead .title{font-size:15.5px;font-weight:700;color:#92400e;margin-top:3px;}
+
+  .stack{display:flex;align-items:center;gap:10px;}
+  .bases{display:flex;flex-direction:column;gap:9px;flex:1;}
+  .chip{
+    border:1.5px solid #fbbf24;background:#fff;border-radius:9px;
+    padding:7px 8px;text-align:center;
+  }
+  .chip .v{font-size:10.5px;color:#b45309;font-weight:600;}
+  .chip .b{font-size:13px;font-weight:700;color:#0f172a;margin-top:1px;}
+  .connect{display:flex;flex-direction:column;align-items:center;color:#d97706;font-size:18px;line-height:1;}
+  .meta{
+    border:1.5px solid #f59e0b;background:#fef3c7;border-radius:10px;
+    padding:9px 8px;text-align:center;width:96px;
+  }
+  .meta .v{font-size:10px;color:#b45309;font-weight:600;}
+  .meta .b{font-size:12.5px;font-weight:700;color:#0f172a;margin-top:2px;line-height:1.25;}
+  .mfoot{text-align:center;font-size:11px;color:#a16207;margin-top:11px;font-style:italic;}
+
+  .legend{text-align:center;color:#9ca3af;font-size:12px;margin-top:44px;line-height:1.6;}
+  .legend b{color:#6b7280;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>IL-10-Induced Peptide Prediction — Model Architecture</h1>
+  <p class="sub">ESM-2 蛋白質語言模型表徵　＋　XGBoost stacking 集成分類器</p>
+
+  <div class="flow">
+
+    <!-- Input -->
+    <div class="stage">
+      <div class="box c-in">
+        <div class="step">Input</div>
+        <div class="title">胜肽序列<br>資料集</div>
+        <div class="desc">訓練集＋獨立測試集</div>
+      </div>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- Preprocess -->
+    <div class="stage">
+      <div class="box c-prep">
+        <div class="step">Preprocess</div>
+        <div class="title">序列解析<br>與清理</div>
+        <div class="desc">過濾非標準胺基酸</div>
+      </div>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- ESM -->
+    <div class="stage">
+      <div class="box c-esm">
+        <div class="step">Representation</div>
+        <div class="title">ESM-2<br>序列嵌入</div>
+        <div class="desc">mean / max pooling</div>
+      </div>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- Stacking model -->
+    <div class="stage">
+      <div class="model">
+        <div class="mhead">
+          <div class="step">Classifier</div>
+          <div class="title">Stacking 集成</div>
+        </div>
+        <div class="stack">
+          <div class="bases">
+            <div class="chip"><div class="v">mean 表徵</div><div class="b">XGBoost</div></div>
+            <div class="chip"><div class="v">max 表徵</div><div class="b">XGBoost</div></div>
+          </div>
+          <div class="connect">⟩</div>
+          <div class="meta"><div class="v">meta-learner</div><div class="b">Logistic<br>Regression</div></div>
+        </div>
+        <div class="mfoot">底層 XGBoost · 上層邏輯回歸整合</div>
+      </div>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- Eval -->
+    <div class="stage">
+      <div class="box c-eval">
+        <div class="step">Evaluation</div>
+        <div class="title">效能評估</div>
+        <div class="desc">ROC-AUC · PR-AUC · MCC</div>
+      </div>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- Output -->
+    <div class="stage">
+      <div class="box c-out">
+        <div class="step">Output</div>
+        <div class="title">候選胜肽<br>排序</div>
+        <div class="desc">高分胜肽預測</div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="legend">
+    <b>Stacking 結構：</b>mean 與 max pooling 表徵各訓練一個 XGBoost 作為 base learner，再由 Logistic Regression 作為 meta-learner 整合輸出最終預測機率。<br>
+    交叉驗證訓練，分類門檻由訓練集決定。
+  </p>
+</div>
+</body>
+</html>

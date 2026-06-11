@@ -1,0 +1,49 @@
+{
+  "VariantName": "esm_only",
+  "VariantLabel": "ESM-only stacking",
+  "Seed": 42,
+  "NumFolds": 5,
+  "EmbeddingModel": "esm2_t33_650M_UR50D",
+  "EmbeddingBatchSize": 32,
+  "EmbeddingDevice": "cuda",
+  "TuningCandidates": [
+    {
+      "CandidateName": "baseline_mean_max",
+      "CandidateLabel": "Mean + max pooling stack",
+      "Views": "mean,max",
+      "TrainOofPrecisionRecallAuc": 0.6949836585863626,
+      "TrainOofMatthewsCorrcoef": 0.5333819281592088,
+      "IndependentTestPrecisionRecallAuc": 0.39003241644690306,
+      "IndependentTestMatthewsCorrcoef": 0.3139301161363769,
+      "ChosenThresholdValue": 0.6027088761329651
+    },
+    {
+      "CandidateName": "mean_max_concat",
+      "CandidateLabel": "Mean + max + concat stack",
+      "Views": "mean,max,concat",
+      "TrainOofPrecisionRecallAuc": 0.6897925087248777,
+      "TrainOofMatthewsCorrcoef": 0.5362231229402353,
+      "IndependentTestPrecisionRecallAuc": 0.39864397771326276,
+      "IndependentTestMatthewsCorrcoef": 0.29277537605321674,
+      "ChosenThresholdValue": 0.545933187007904
+    },
+    {
+      "CandidateName": "regularized_mean_max",
+      "CandidateLabel": "Regularized mean + max stack",
+      "Views": "mean,max",
+      "TrainOofPrecisionRecallAuc": 0.6610999050998053,
+      "TrainOofMatthewsCorrcoef": 0.5316989023691299,
+      "IndependentTestPrecisionRecallAuc": 0.41141073749597407,
+      "IndependentTestMatthewsCorrcoef": 0.45998233802053606,
+      "ChosenThresholdValue": 0.5297222137451172
+    }
+  ],
+  "ChosenCandidate": {
+    "CandidateName": "baseline_mean_max",
+    "CandidateLabel": "Mean + max pooling stack",
+    "Views": [
+      "mean",
+      "max"
+    ]
+  }
+}

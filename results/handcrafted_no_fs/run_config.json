@@ -1,0 +1,16 @@
+{
+  "VariantName": "handcrafted_no_fs",
+  "VariantLabel": "ESM2 + AAC + DPC + aaIndex without feature selection",
+  "Seed": 42,
+  "NumFolds": 5,
+  "EmbeddingModel": "esm2_t33_650M_UR50D",
+  "EmbeddingBatchSize": 32,
+  "EmbeddingDevice": "cuda",
+  "FeatureSelection": "disabled",
+  "FeatureCount": 3520,
+  "FeatureComposition": {
+    "EsmMeanDimensions": 1280,
+    "EsmMaxDimensions": 1280,
+    "HandcraftedDimensions": 960
+  }
+}

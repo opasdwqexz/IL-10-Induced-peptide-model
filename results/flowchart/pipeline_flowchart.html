@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IL-10 Peptide Model — Pipeline 流程圖</title>
+<style>
+  :root{
+    --bg:#0f1620;
+    --card:#1b2735;
+    --ink:#e8eef5;
+    --muted:#9fb0c3;
+    --line:#3a4a5e;
+    --entry:#6366f1;
+    --data:#0ea5e9;
+    --esm:#14b8a6;
+    --branchA:#f59e0b;
+    --branchB:#ec4899;
+    --branchC:#8b5cf6;
+    --eval:#22c55e;
+    --out:#64748b;
+    --cmp:#ef4444;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+    padding:36px 28px 56px;
+  }
+  .sheet{max-width:1180px;margin:0 auto;}
+  h1{
+    font-size:26px;margin:0 0 4px;letter-spacing:.5px;
+  }
+  .sub{color:var(--muted);font-size:14px;margin:0 0 26px;}
+  .sub code{background:#0b1119;padding:2px 7px;border-radius:5px;color:#cfe3ff;font-size:13px;}
+
+  /* layout helpers */
+  .stage{display:flex;flex-direction:column;align-items:center;}
+  .arrow{width:2px;height:26px;background:var(--line);position:relative;margin:6px 0;}
+  .arrow::after{content:"";position:absolute;bottom:-1px;left:-4px;border:5px solid transparent;border-top-color:var(--line);}
+
+  .node{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-left:5px solid var(--out);
+    border-radius:12px;
+    padding:14px 18px;
+    width:100%;
+    max-width:760px;
+    box-shadow:0 4px 16px rgba(0,0,0,.28);
+  }
+  .node .tag{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.8px;
+    text-transform:uppercase;color:#0b1119;padding:2px 9px;border-radius:20px;margin-bottom:8px;
+  }
+  .node h3{margin:0 0 6px;font-size:17px;}
+  .node h3 .file{font-size:12px;color:var(--muted);font-weight:500;margin-left:8px;}
+  .node p{margin:4px 0 0;font-size:13.5px;color:var(--muted);line-height:1.5;}
+  .node ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--muted);line-height:1.55;}
+  .node code{background:#0b1119;padding:1px 6px;border-radius:4px;color:#cfe3ff;font-size:12.5px;}
+
+  .c-entry{border-left-color:var(--entry);} .t-entry{background:var(--entry);}
+  .c-data{border-left-color:var(--data);}   .t-data{background:var(--data);}
+  .c-esm{border-left-color:var(--esm);}     .t-esm{background:var(--esm);}
+  .c-eval{border-left-color:var(--eval);}   .t-eval{background:var(--eval);}
+  .c-out{border-left-color:var(--out);}     .t-out{background:#94a3b8;}
+  .c-cmp{border-left-color:var(--cmp);}     .t-cmp{background:var(--cmp);}
+
+  /* branch row */
+  .split-label{
+    font-size:13px;color:var(--muted);margin:2px 0 10px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .split-label b{color:var(--ink);}
+  .branches{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:18px;width:100%;align-items:stretch;
+  }
+  .branch{
+    background:var(--card);border:1px solid var(--line);border-top:4px solid var(--out);
+    border-radius:12px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,.28);
+    display:flex;flex-direction:column;
+  }
+  .branch.A{border-top-color:var(--branchA);}
+  .branch.B{border-top-color:var(--branchB);}
+  .branch.C{border-top-color:var(--branchC);}
+  .branch .vname{font-size:12px;font-weight:700;color:#0b1119;border-radius:6px;padding:3px 8px;display:inline-block;align-self:flex-start;margin-bottom:8px;}
+  .branch.A .vname{background:var(--branchA);}
+  .branch.B .vname{background:var(--branchB);}
+  .branch.C .vname{background:var(--branchC);}
+  .branch h4{margin:0 0 8px;font-size:14.5px;}
+  .branch ol{margin:0;padding-left:17px;font-size:12.5px;color:var(--muted);line-height:1.55;}
+  .branch ol li{margin-bottom:5px;}
+  .branch code{background:#0b1119;padding:1px 5px;border-radius:4px;color:#cfe3ff;font-size:11.5px;}
+  .branch .mini{margin-top:auto;padding-top:10px;font-size:11.5px;color:#7c8ba0;font-style:italic;}
+
+  .merge-note{font-size:12.5px;color:var(--muted);margin:10px 0 4px;text-align:center;}
+
+  .outputs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 22px;width:100%;max-width:760px;margin-top:4px;}
+  .outputs .o{font-size:12.5px;color:var(--muted);padding-left:16px;position:relative;line-height:1.5;}
+  .outputs .o::before{content:"▸";position:absolute;left:0;color:var(--eval);}
+  .outputs .o b{color:var(--ink);font-weight:600;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:34px;font-size:12px;color:var(--muted);}
+  .legend span{display:flex;align-items:center;gap:6px;}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block;}
+  footer{text-align:center;color:#5b6b7e;font-size:11.5px;margin-top:26px;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>IL-10-Induced Peptide Model — 訓練 Pipeline</h1>
+  <p class="sub">入口 <code>main.py</code> → <code>src/pipeline.py · run_pipeline()</code>　·　三個模型 variant（共用 ESM 嵌入後分流）　·　評估只用 train OOF 學門檻</p>
+
+  <div class="stage">
+
+    <!-- 1. Entry -->
+    <div class="node c-entry">
+      <span class="tag t-entry">1 · 入口</span>
+      <h3>CLI 參數 → PipelineConfig <span class="file">main.py</span></h3>
+      <p>解析參數後建立 <code>PipelineConfig</code> 並呼叫 <code>run_pipeline()</code>。</p>
+      <ul>
+        <li><code>--variant</code> esm_only / handcrafted_no_fs / handcrafted_with_fs / <b>all</b></li>
+        <li><code>--esm-model</code> 預設 <code>esm2_t33_650M_UR50D</code>、<code>--batch-size 32</code>、<code>--num-folds 5</code>、<code>--seed 42</code></li>
+        <li>輸入：<code>data/peptide_level_dataset_MHCII.csv</code>（train）、<code>data/all_minus_benchmark_minus_mhcii.csv</code>（independent test）</li>
+      </ul>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- 2. Data -->
+    <div class="node c-data">
+      <span class="tag t-data">2 · 資料處理</span>
+      <h3>載入與解析序列 <span class="file">src/data.py · load_datasets()</span></h3>
+      <ul>
+        <li>解析每筆 <code>Sequence</code>：拆成 <code>BaseSeq + Annotation</code>，偵測修飾關鍵字 <code>PHOS/DEAM/CITR/ACET/MCM</code></li>
+        <li>產生中介特徵：<code>HasMod / ModCount / SeqLength / LogLength</code> 等 modification metadata</li>
+        <li>只保留標準 20 種胺基酸序列（<code>IsStandardBaseSeq</code> 過濾）</li>
+        <li>輸出稽核 <code>results/data_audit.json</code>（正負比例、train/test 序列重疊度等）</li>
+      </ul>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- 3. ESM embedding (shared) -->
+    <div class="node c-esm">
+      <span class="tag t-esm">3 · 共用嵌入</span>
+      <h3>ESM-2 序列嵌入（所有 variant 共用）<span class="file">src/features.py · ESMEmbedder</span></h3>
+      <p>對 <code>BaseSeq</code> 跑 ESM-2，取每個殘基表示後做 <b>mean pooling</b> 與 <b>max pooling</b>，結果快取到 <code>artifacts/cache/*.npz</code>（自動偵測 CUDA / CPU）。</p>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- 4. Branches -->
+    <div class="split-label">🔀 <b>依 variant 分流</b>（<code>--variant all</code> 時三條都跑，逐一進入 <code>_run_single_variant()</code>）</div>
+    <div class="branches">
+
+      <div class="branch A">
+        <span class="vname">esm_only</span>
+        <h4>ESM-only Stacking</h4>
+        <ol>
+          <li>組三種 view：<code>mean</code> / <code>max</code> / <code>concat</code>，各自再接上 modification metadata</li>
+          <li>掃 3 組 tuning candidate（mean+max、+concat、regularized）</li>
+          <li>每組做<b>巢狀 CV stacking</b>：每個 view 一個 XGBoost 當 base，再用 Logistic Regression 當 meta-model 疊合</li>
+          <li>用 train OOF 的 PR-AUC / MCC 選出最佳 candidate → <code>tuning_summary.csv</code></li>
+        </ol>
+        <div class="mini">train_esm_stacking_variant()</div>
+      </div>
+
+      <div class="branch B">
+        <span class="vname">handcrafted_no_fs</span>
+        <h4>ESM + 手工特徵（不做篩選）</h4>
+        <ol>
+          <li>建手工特徵 <code>AAC + DPC + aaIndex + mod</code>（<code>build_handcrafted_features</code>）</li>
+          <li>與 ESM <code>mean</code>+<code>max</code> embedding 串接成單一特徵矩陣</li>
+          <li><b>不做</b>任何特徵篩選</li>
+          <li>單一 XGBoost：StratifiedKFold 產生 OOF，再用平均最佳迭代數重訓全資料模型</li>
+        </ol>
+        <div class="mini">train_single_xgb_variant()</div>
+      </div>
+
+      <div class="branch C">
+        <span class="vname">handcrafted_with_fs</span>
+        <h4>ESM + 手工特徵（含篩選）</h4>
+        <ol>
+          <li>同上組合 ESM + AAC + DPC + aaIndex + mod</li>
+          <li><b>三段特徵篩選</b>：① 變異數過濾 ② aaIndex 相關性過濾（|r|&gt;0.95）③ XGBoost 重要度過濾 → <code>feature_selection_summary.json</code></li>
+          <li>篩選後特徵丟進同一個單一 XGBoost</li>
+          <li>StratifiedKFold OOF + 全資料重訓</li>
+        </ol>
+        <div class="mini">train_single_xgb_variant()</div>
+      </div>
+
+    </div>
+
+    <div class="arrow"></div>
+    <div class="merge-note">三條分支都產出 <code>train OOF 機率</code> 與 <code>independent test 機率</code>，匯入相同評估流程</div>
+
+    <!-- 5. Eval -->
+    <div class="node c-eval">
+      <span class="tag t-eval">5 · 評估與門檻</span>
+      <h3>指標與決策門檻 <span class="file">src/model.py · build_metric_tables()</span></h3>
+      <ul>
+        <li><b>門檻只從 train OOF 機率學</b>：<code>default 0.5</code>、<code>best MCC</code>、<code>best F2</code></li>
+        <li>對 TrainOOF 與 IndependentTest 各算：ROC-AUC、PR-AUC、MCC、Balanced Acc、Precision、Recall/Sensitivity、Specificity、F1、F2、混淆矩陣</li>
+      </ul>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- 6. Outputs -->
+    <div class="node c-out">
+      <span class="tag t-out">6 · 每個 variant 的輸出</span>
+      <h3>寫入 <span class="file">results/&lt;variant&gt;/</span> 與 <span class="file">artifacts/models/</span></h3>
+      <div class="outputs">
+        <div class="o"><b>metrics.csv</b> · fold_summary.csv</div>
+        <div class="o"><b>train_oof / test_predictions.csv</b></div>
+        <div class="o"><b>roc_pr_curves.png</b> · confusion_matrices.png</div>
+        <div class="o"><b>top10 short peptides</b>（長度 ≤15 的高分胜肽）</div>
+        <div class="o">esm_only 限定：<b>attribution heatmap</b>（逐位點 Ala/Gly 取代掃描看機率下降）</div>
+        <div class="o"><b>run_config.json</b> · <code>&lt;variant&gt;_bundle.pkl</code> 模型包</div>
+      </div>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- 7. Comparison -->
+    <div class="node c-cmp">
+      <span class="tag t-cmp">7 · 跨 variant 比較</span>
+      <h3>彙整比較表 <span class="file">_write_comparison()</span></h3>
+      <p>取各 variant 在 <b>IndependentTest × best-MCC 門檻</b> 的成績，依 MCC、PR-AUC 排序 →
+        <code>results/model_comparison_summary.csv</code> 與 <code>model_comparison_full_metrics.csv</code>。</p>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <span><i class="dot" style="background:var(--entry)"></i>入口</span>
+    <span><i class="dot" style="background:var(--data)"></i>資料處理</span>
+    <span><i class="dot" style="background:var(--esm)"></i>ESM 嵌入</span>
+    <span><i class="dot" style="background:var(--branchA)"></i>esm_only</span>
+    <span><i class="dot" style="background:var(--branchB)"></i>handcrafted_no_fs</span>
+    <span><i class="dot" style="background:var(--branchC)"></i>handcrafted_with_fs</span>
+    <span><i class="dot" style="background:var(--eval)"></i>評估</span>
+    <span><i class="dot" style="background:var(--cmp)"></i>比較</span>
+  </div>
+
+  <footer>IL-10-Induced Peptide Model · pipeline 流程圖 · 由 repo 原始碼整理（main.py / src/{data,features,model,pipeline}.py）</footer>
+</div>
+</body>
+</html>

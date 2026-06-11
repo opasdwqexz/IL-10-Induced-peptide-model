@@ -1,0 +1,4 @@
+Testing set validation,Testing set validation,RocAuc,PRAuc,MCC,Accuracy,Precision,Recall,Specificity,F1Score,
+esm_only,ESM-only stacking,0.806,0.390,0.314,0.744,0.232,0.847,0.640,0.364,
+handcrafted_with_fs,ESM2 + AAC + DPC + aaIndex with feature selection,0.758,0.276,0.256,0.699,0.210,0.770,0.628,0.329,
+handcrafted_no_fs,ESM2 + AAC + DPC + aaIndex without feature selection,0.776,0.322,0.253,0.699,0.188,0.887,0.510,0.311,

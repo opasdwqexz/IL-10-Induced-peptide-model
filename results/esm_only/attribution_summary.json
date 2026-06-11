@@ -1,0 +1,16 @@
+{
+  "TrainOOF": {
+    "Peptide": "LALEGSLQK",
+    "OriginalProbability": 0.9663982391357422,
+    "Length": 9,
+    "MaxProbabilityDrop": 0.0790156368338012,
+    "MeanProbabilityDrop": 0.04492735544540573
+  },
+  "IndependentTest": {
+    "Peptide": "LLRAVESYLLAH",
+    "OriginalProbability": 0.9564377538621102,
+    "Length": 12,
+    "MaxProbabilityDrop": 0.041385604702772416,
+    "MeanProbabilityDrop": 0.02417492132942506
+  }
+}

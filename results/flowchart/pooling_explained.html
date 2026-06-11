@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mean / Max Pooling 解析圖（橫向）</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:#ffffff;color:#1f2933;
+    font-family:"Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+    padding:54px 40px;
+  }
+  .sheet{max-width:1200px;margin:0 auto;}
+  h1{font-size:30px;font-weight:700;text-align:center;color:#111827;margin-bottom:6px;}
+  .sub{text-align:center;color:#6b7280;font-size:18px;margin-bottom:52px;}
+
+  /* horizontal flow */
+  .flow{display:flex;align-items:center;justify-content:center;gap:4px;}
+
+  /* peptide chips (vertical column to feel like the input residues) */
+  .pep{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .pep .dots{font-size:24px;color:#94a3b8;font-weight:700;line-height:.6;}
+  .res{
+    width:54px;height:54px;border-radius:12px;border:2.5px solid #2dd4bf;background:#f0fdfa;
+    display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#0f766e;
+  }
+  .pep .plab{font-size:14px;color:#0f766e;margin-top:4px;}
+
+  /* horizontal arrow with label */
+  .harrow{display:flex;flex-direction:column;align-items:center;gap:7px;padding:0 8px;}
+  .harrow .lbl{font-size:14.5px;color:#64748b;text-align:center;line-height:1.35;max-width:130px;}
+  .harrow .lbl b{color:#334155;}
+  .harrow .line{width:70px;height:3px;background:#cbd5e1;position:relative;}
+  .harrow .line::after{content:"";position:absolute;right:-1px;top:-6px;border:7px solid transparent;border-left-color:#cbd5e1;}
+
+  /* matrix */
+  .matrix{display:grid;grid-template-columns:62px repeat(4,60px);gap:7px;align-items:center;}
+  .hcell{font-size:15px;font-weight:700;color:#94a3b8;height:26px;display:flex;align-items:center;justify-content:center;}
+  .cell{height:50px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px;}
+  .rlabel{font-weight:700;color:#0f766e;font-size:19px;}
+  .data{background:#f1f5f9;border:1.5px solid #e2e8f0;color:#334155;font-variant-numeric:tabular-nums;}
+  .col-hl{background:#fef9c3;border-color:#facc15;}
+  .matrix .mcap{grid-column:1 / 6;text-align:center;font-size:14px;color:#94a3b8;margin-top:4px;}
+
+  /* output vectors */
+  .outputs{display:flex;flex-direction:column;gap:18px;}
+  .vecrow{display:flex;align-items:center;gap:10px;}
+  .vname{width:62px;font-size:18px;font-weight:700;text-align:right;}
+  .vcells{display:flex;gap:7px;}
+  .vcell{
+    width:60px;height:50px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;
+  }
+  .vtag{font-size:15px;line-height:1.35;max-width:160px;margin-left:6px;}
+  .vtag small{display:block;color:#64748b;font-size:13px;font-weight:400;}
+
+  .mean .vname{color:#1d4ed8;}
+  .mean .vcell{background:#dbeafe;border:1.5px solid #93c5fd;color:#1e3a8a;}
+  .mean .vtag{color:#1d4ed8;font-weight:700;}
+  .max .vname{color:#c2410c;}
+  .max .vcell{background:#ffedd5;border:1.5px solid #fdba74;color:#9a3412;}
+  .max .vtag{color:#c2410c;font-weight:700;}
+  .vcell.hl{outline:3px solid #facc15;outline-offset:1px;}
+
+  /* highlight note */
+  .hlnote{
+    margin:40px auto 0;max-width:880px;text-align:center;font-size:16px;color:#a16207;line-height:1.6;
+    background:#fefce8;border:1.5px dashed #facc15;border-radius:12px;padding:14px 18px;
+  }
+  .hlnote b.blue{color:#1d4ed8;} .hlnote b.amber{color:#c2410c;}
+
+  .foot{
+    margin-top:26px;font-size:16px;color:#475569;line-height:1.9;text-align:center;
+  }
+  .foot b.blue{color:#1d4ed8;} .foot b.amber{color:#c2410c;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>ESM-2 嵌入的 Mean / Max Pooling</h1>
+  <p class="sub">把「不定長序列」摘要成「固定長度向量」的兩種視角</p>
+
+  <div class="flow">
+
+    <!-- peptide -->
+    <div class="pep">
+      <span class="dots">⋮</span>
+      <div class="res">F</div>
+      <div class="res">K</div>
+      <div class="res">P</div>
+      <span class="dots">⋮</span>
+      <div class="plab">胜肽序列<br>（L 個殘基）</div>
+    </div>
+
+    <!-- arrow: ESM -->
+    <div class="harrow">
+      <div class="lbl"><b>ESM-2</b><br>每個殘基→一個向量</div>
+      <div class="line"></div>
+    </div>
+
+    <!-- matrix -->
+    <div class="matrix">
+      <div class="hcell"></div>
+      <div class="hcell">d1</div><div class="hcell">d2</div>
+      <div class="hcell">d3</div><div class="hcell">d4</div>
+
+      <div class="cell rlabel">F</div>
+      <div class="cell data">0.2</div><div class="cell data">0.9</div>
+      <div class="cell data col-hl">0.1</div><div class="cell data">0.5</div>
+
+      <div class="cell rlabel">K</div>
+      <div class="cell data">0.4</div><div class="cell data">0.1</div>
+      <div class="cell data col-hl">0.0</div><div class="cell data">0.7</div>
+
+      <div class="cell rlabel">P</div>
+      <div class="cell data">0.6</div><div class="cell data">0.2</div>
+      <div class="cell data col-hl">0.8</div><div class="cell data">0.3</div>
+
+      <div class="mcap">每列＝一個殘基的向量（示意 4 維，實際 1280 維）</div>
+    </div>
+
+    <!-- arrow: pooling -->
+    <div class="harrow">
+      <div class="lbl">沿<b>每一欄</b>聚合<br>（跨所有位置）</div>
+      <div class="line"></div>
+    </div>
+
+    <!-- output vectors -->
+    <div class="outputs">
+      <div class="vecrow mean">
+        <div class="vname">mean</div>
+        <div class="vcells">
+          <div class="vcell">0.4</div><div class="vcell">0.4</div>
+          <div class="vcell hl">0.3</div><div class="vcell">0.5</div>
+        </div>
+        <div class="vtag">整體平均傾向<small>每欄取平均</small></div>
+      </div>
+      <div class="vecrow max">
+        <div class="vname">max</div>
+        <div class="vcells">
+          <div class="vcell">0.6</div><div class="vcell">0.9</div>
+          <div class="vcell hl">0.8</div><div class="vcell">0.7</div>
+        </div>
+        <div class="vtag">最強局部訊號<small>每欄取最大</small></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="hlnote">
+    看反白的 <b>d3</b> 欄：殘基 P 有個很強的訊號 <b>0.8</b>。
+    <b class="blue">mean</b> 把它平均稀釋成 0.3，<b class="amber">max</b> 完整保留 0.8 —— 這就是兩者互補之處。
+  </div>
+
+  <p class="foot">
+    <b class="blue">Mean pooling</b>：整條胜肽的<b>整體、平均</b>性質 ｜
+    <b class="amber">Max pooling</b>：任一位置上<b>最突出</b>的特徵（關鍵殘基 / motif）<br>
+    兩個向量分別餵入各自的 XGBoost，再由 Logistic Regression 整合（stacking）
+  </p>
+</div>
+</body>
+</html>

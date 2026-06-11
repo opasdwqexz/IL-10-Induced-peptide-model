@@ -1,0 +1,49 @@
+{
+  "train": {
+    "rows": 1278,
+    "valid_rows": 1278,
+    "invalid_rows": 0,
+    "positive": 447,
+    "negative": 831,
+    "positive_ratio": 0.34976525821596244,
+    "modified_rows": 22,
+    "unique_raw_sequences": 1278,
+    "unique_base_sequences": 1268,
+    "duplicate_raw_sequences": 0,
+    "duplicate_base_sequences": 10,
+    "length_min": 8,
+    "length_median": 15.0,
+    "length_max": 42
+  },
+  "test": {
+    "rows": 3983,
+    "valid_rows": 3983,
+    "invalid_rows": 0,
+    "positive": 452,
+    "negative": 3531,
+    "positive_ratio": 0.11348229977403967,
+    "modified_rows": 95,
+    "unique_raw_sequences": 3983,
+    "unique_base_sequences": 3895,
+    "duplicate_raw_sequences": 0,
+    "duplicate_base_sequences": 88,
+    "length_min": 8,
+    "length_median": 15.0,
+    "length_max": 46
+  },
+  "overlap": {
+    "raw_overlap_count": 0,
+    "base_overlap_count": 1,
+    "raw_overlap_examples": [],
+    "base_overlap_examples": [
+      "DESIGLQLPFSSWYV"
+    ]
+  },
+  "mod_keywords": [
+    "PHOS",
+    "DEAM",
+    "CITR",
+    "ACET",
+    "MCM"
+  ]
+}

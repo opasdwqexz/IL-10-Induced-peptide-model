@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IL-10 誘導胜肽 — 作用機制流程圖</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:#ffffff;color:#1f2933;
+    font-family:"Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+    padding:54px 36px 70px;
+  }
+  .sheet{max-width:1220px;margin:0 auto;}
+  h1{font-size:27px;font-weight:700;text-align:center;color:#111827;margin-bottom:6px;}
+  .sub{text-align:center;color:#6b7280;font-size:16px;margin-bottom:52px;}
+
+  .flow{display:flex;align-items:stretch;justify-content:center;gap:0;}
+  .stage{display:flex;align-items:center;}
+
+  .box{
+    width:196px;min-height:150px;
+    border:2px solid #cbd5e1;border-radius:14px;background:#f8fafc;
+    padding:16px 16px;display:flex;flex-direction:column;justify-content:center;text-align:center;
+  }
+  .box .step{font-size:11px;font-weight:700;letter-spacing:1px;color:#94a3b8;text-transform:uppercase;}
+  .box .title{font-size:17.5px;font-weight:700;margin-top:5px;color:#0f172a;line-height:1.32;}
+  .box .desc{font-size:13.5px;color:#64748b;margin-top:7px;line-height:1.45;}
+
+  /* paired rows inside T-cell node */
+  .pair{margin-top:9px;display:flex;flex-direction:column;gap:6px;}
+  .pair .row{font-size:13px;border-radius:8px;padding:5px 8px;line-height:1.3;}
+  .pair .main{background:#ede9fe;color:#5b21b6;font-weight:700;border:1px solid #c4b5fd;}
+  .pair .sec{background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;}
+
+  .c-pep {border-color:#2dd4bf;background:#f0fdfa;}
+  .c-apc {border-color:#60a5fa;background:#eff6ff;}
+  .c-tcell{border-color:#a78bfa;background:#f5f3ff;}
+  .c-treg{border-color:#fbbf24;background:#fffbeb;}
+  .c-supp{border-color:#fb7185;background:#fff1f2;}
+
+  .arrow{width:42px;height:3px;background:#cbd5e1;position:relative;flex-shrink:0;}
+  .arrow::after{content:"";position:absolute;right:0;top:-6px;border:7px solid transparent;border-left-color:#cbd5e1;}
+
+  /* feedback loop */
+  .loopwrap{position:relative;margin:0 auto;width:86%;}
+  .loop{
+    height:56px;margin-top:6px;
+    border-left:3px dashed #fb7185;border-right:3px dashed #fb7185;border-bottom:3px dashed #fb7185;
+    border-radius:0 0 14px 14px;position:relative;
+  }
+  .loop .head{position:absolute;left:-9px;top:-2px;border:8px solid transparent;border-bottom-color:#fb7185;}
+  .loop .lbl{
+    position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);
+    background:#fff;padding:0 14px;font-size:15px;color:#e11d48;font-weight:700;white-space:nowrap;
+  }
+  .loop .lbl small{color:#fb7185;font-weight:400;}
+
+  .legend{text-align:center;color:#9ca3af;font-size:13.5px;margin-top:66px;line-height:1.7;}
+  .legend b{color:#6b7280;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>IL-10 誘導胜肽 — 免疫調節作用機制</h1>
+  <p class="sub">本模型預測的胜肽 → 經 MHC 呈現活化 T 細胞 → 誘導調節型 T 細胞分泌 IL-10 → 負回饋抑制免疫反應</p>
+
+  <div class="flow">
+
+    <!-- 1. peptide -->
+    <div class="stage">
+      <div class="box c-pep">
+        <div class="step">Peptide</div>
+        <div class="title">IL-10<br>誘導胜肽</div>
+        <div class="desc">本模型預測<br>的目標序列</div>
+      </div>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- 2. APC -->
+    <div class="stage">
+      <div class="box c-apc">
+        <div class="step">Presentation</div>
+        <div class="title">APC 呈現抗原</div>
+        <div class="desc">抗原呈現細胞將胜肽<br>載於 <b>MHC I / II</b> 表面</div>
+      </div>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- 3. T cell -->
+    <div class="stage">
+      <div class="box c-tcell">
+        <div class="step">Recognition</div>
+        <div class="title">T 細胞辨識</div>
+        <div class="pair">
+          <div class="row main">MHC&nbsp;II → CD4⁺ T 細胞</div>
+          <div class="row sec">MHC&nbsp;I → CD8⁺ T 細胞</div>
+        </div>
+      </div>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- 4. Treg -->
+    <div class="stage">
+      <div class="box c-treg">
+        <div class="step">Differentiation</div>
+        <div class="title">調節型 T 細胞<br>分泌 IL-10</div>
+        <div class="desc">分化為 <b>Tr1 / Treg</b><br>（以 CD4⁺ 路徑為主）</div>
+      </div>
+    </div>
+    <div class="arrow"></div>
+
+    <!-- 5. suppression -->
+    <div class="stage">
+      <div class="box c-supp">
+        <div class="step">Outcome</div>
+        <div class="title">抑制免疫反應</div>
+        <div class="desc">降低發炎、誘導<br>免疫耐受</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- feedback loop -->
+  <div class="loopwrap">
+    <div class="loop">
+      <span class="head"></span>
+      <span class="lbl">IL-10 負回饋 ⊣ 抑制 APC 呈現與發炎反應　<small>（免疫耐受迴路）</small></span>
+    </div>
+  </div>
+
+  <p class="legend">
+    <b>主線（紫色加粗）：</b>MHC II → CD4⁺ T 細胞 → Tr1 / Treg，是 IL-10 的主要來源（與本研究 MHC II 資料集一致）。<br>
+    CD8⁺ 路徑為次要來源。IL-10 分泌後回頭抑制抗原呈現與發炎，形成<b>負回饋免疫耐受迴路</b>。
+  </p>
+</div>
+</body>
+</html>

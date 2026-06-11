@@ -1,0 +1,8 @@
+{
+  "initial_features": 3520,
+  "removed_low_variance": 9,
+  "removed_correlated_aaindex": 163,
+  "removed_low_importance": 2264,
+  "final_features": 1084,
+  "importance_threshold": 0.00029868577257730067
+}

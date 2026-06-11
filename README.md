@@ -1,4 +1,4 @@
-# IL-10-Induced Peptide Model
+# IL-10-Induced Peptide Prediction Model
 
 This repository now supports three switchable model variants and one comparison mode.
 
